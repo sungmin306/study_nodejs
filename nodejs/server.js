@@ -2,9 +2,8 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({extended : true})); //-> 적힌 거를 해석할 수 있게 도와줌
-
 const MongoClient = require('mongodb').MongoClient;
-
+app.set('view engine', 'ejs')
 var db;
 MongoClient.connect('mongodb+srv://another0306:whtjdals0306@cluster0.4zzgfc3.mongodb.net/?retryWrites=true&w=majority', function(error, client){
 
@@ -13,9 +12,9 @@ MongoClient.connect('mongodb+srv://another0306:whtjdals0306@cluster0.4zzgfc3.mon
 
     db = client.db('todoapp');
     
-    db.collection('post').insertOne( {이름: 'John', 나이: 20}, function(에러, 결과){
-        console.log('저장완료');
-    });
+    // db.collection('post').insertOne( {이름: 'John', 나이: 20}, function(에러, 결과){
+    //     console.log('저장완료');
+    // });
 
     app.listen(8080, function(){
         console.log('listening on 8080')
@@ -51,4 +50,19 @@ app.post('/add', function(req, res){
     console.log(req.body.title);
     console.log(req.body.date);
     //DB에 저장해주세요-> 통해서 영구저장 가능
+    db.collection('post').insertOne({제목: req.body.title, 날짜: req.body.date}, function(에러, 결과){
+        console.log('저장완료');
+    });
 });
+
+
+app.get('/list', function(req, res){
+
+    //db에 저장된 post라는 collections안의 ???의 데이터를 꺼내주세요
+    db.collection('post').find().toArray(function(에러, 결과){
+        console.log(결과);
+        res.render('list.ejs', {posts : 결과 });
+    });
+    
+
+})
