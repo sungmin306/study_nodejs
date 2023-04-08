@@ -47,20 +47,38 @@ app.get('/write', function(req,res){
 
 app.post('/add', function(req, res){
     res.send('전송완료')
-    console.log(req.body.title);
-    console.log(req.body.date);
+    // console.log(req.body.title);
+    // console.log(req.body.date);
+    db.collection('counter').findOne({name : '게시물갯수'}, function(error, result){
+        //console.log(result.totalPost) // 총 게시물 갯수
+        var 총게시물갯수 = result.totalPost
+        db.collection('post').insertOne({_id : 총게시물갯수 + 1, 제목: req.body.title, 날짜: req.body.date}, function(에러, 결과){
+            //console.log('저장완료');
+             //+ counter 라는 콜렉션에 있는 totalPost 라는 항목도 1 증가시켜야함;
+            db.collection('counter').updateOne({name: '게시물갯수'},{ $inc : {totalPost:1} },function(error, result){
+                if(error){return console.log(error)}
+            }) // 한번에 많이는 updateMany update는 operator 연산자를 사용해야함
+    });// counter 에 있는 값을 찾겠다
     //DB에 저장해주세요-> 통해서 영구저장 가능
-    db.collection('post').insertOne({제목: req.body.title, 날짜: req.body.date}, function(에러, 결과){
-        console.log('저장완료');
     });
+
+app.delete('/delete', function(req,res){
+    console.log(req.body)
+    //req.body에 담겨온 게시물번호를 가진 글을 db에서 찾아서 삭제해주세요
+
+
+})
+
+    
 });
+
 
 
 app.get('/list', function(req, res){
 
     //db에 저장된 post라는 collections안의 ???의 데이터를 꺼내주세요
     db.collection('post').find().toArray(function(에러, 결과){
-        console.log(결과);
+        //console.log(결과);
         res.render('list.ejs', {posts : 결과 });
     });
     
