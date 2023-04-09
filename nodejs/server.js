@@ -3,10 +3,13 @@ const app = express();
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({extended : true})); //-> 적힌 거를 해석할 수 있게 도와줌
 const MongoClient = require('mongodb').MongoClient;
+const methodOverride = require('method-override') // use method-override 
+app.use(methodOverride('_method')) //// use method-override 
 app.set('view engine', 'ejs')
 var db;
 MongoClient.connect('mongodb+srv://another0306:whtjdals0306@cluster0.4zzgfc3.mongodb.net/?retryWrites=true&w=majority', function(error, client){
 
+app.use('/public', express.static('public')); //middle 웨어라고 함 public 폴더까지 사용하겠다는 의미
     if (error) return console.log(error);
     //서버띄우는 코드 여기로 옮기기
 
@@ -35,11 +38,13 @@ app.get('/beauty',function(req,res){  //callback 함수라고함 함수안에 �
 });
 
 app.get('/',function(req,res){ // "/" 하나만 보내면 홈페이지
-    res.sendFile(__dirname + '/index.html');
+    //res.sendFile(__dirname + '/index.html');
+    res.render('index.ejs');
 });
 
 app.get('/write', function(req,res){
-    res.sendFile(__dirname + '/write.html');
+    //res.sendFile(__dirname + '/write.html');
+    res.render('write.ejs');
 });
 
 //어떤 사람이 /add 경로로 post 요청을 하면..
@@ -94,3 +99,20 @@ app.get('/detail/:id', function(req, res){
         res.render('detail.ejs', {data : result} )
     })
   });
+
+app.get('/edit/:id', function(req,res){
+    // edit/2 로 접속하면 2번게시물 제목, 날짜를 edit.ejs 로 보냄
+
+    db.collection('post').findOne({_id : parseInt(req.params.id)}, function(error, result){
+        console.log(result);
+        res.render('edit.ejs', { post : result })
+    })
+})
+
+app.put('/edit', function(req,res){
+    //폼에담긴 제목 데이터, 날짜 데이터를 가지고 db.collection 에다가 업데이트함
+    db.collection('post').updateOne({ _id : parseInt(req.body.id)}, { $set : {제목: req.body.title, 날짜 : req.body.date}},function(error, result){ //$ -> operator
+        console.log('수정완료')
+        res.redirect('/list')
+    })
+});
