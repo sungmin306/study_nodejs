@@ -116,3 +116,26 @@ app.put('/edit', function(req,res){
         res.redirect('/list')
     })
 });
+
+
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+const session = require('express-session');
+
+app.use(session({secret : '비밀코드', resave : true, saveUninitalized: false}));
+app.use(passport.initialize());
+app.use(passport.session());
+
+// 미들웨어 = 요청 응답 중간에 실행되는 코드
+
+app.get('/login', function(req,res){
+    res.render('login.ejs')
+});
+
+
+app.post('/login',passport.authenticate('local', {
+    failureRedirect: '/fail'
+}), function(req,res){
+
+
+});
